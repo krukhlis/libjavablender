@@ -175,7 +175,21 @@ public class ModelParser2 {
 
 	public int parsefileblock(char[] buf, int index) {
 
-		int size = parsefileblockheader(buf,index);
+/****
+		for (; index < buf.length-4; ) {
+
+		char[] cs = new char[4];
+		cs[0] = buf[index+0];
+		cs[1] = buf[index+1];
+		cs[2] = buf[index+2];
+		cs[3] = buf[index+3];
+		index += 2;
+		if (cs[0] == 'D' && cs[1] == 'N' && cs[2] == 'A' && cs[3] == '1') {
+			index -= 4;	
+			break;
+		}
+		}	
+***/		int size = parsefileblockheader(buf,index);
 		if (fileblockid == "DNA1")
 			parseDNA(buf,index);
 		else
@@ -400,7 +414,7 @@ public class ModelParser2 {
 					if (c == '\0')
 						break;	
 				} 
-				index += j;	
+				index += j+1;	
 				index += 4;//'TYPE'
 				
 				int typesn;
@@ -418,7 +432,7 @@ public class ModelParser2 {
 						if (c == '\0')
 							break;	
 					} 
-					index += o;	
+					index += o+1;	
 
 					index +=2;
 					index += 4;//length id
