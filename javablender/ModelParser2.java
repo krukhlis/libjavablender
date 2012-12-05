@@ -32,7 +32,7 @@ public class ModelParser2 {
 	private int[] ys;
 	private int[] zs;
 	private int[] cs;
-
+	private String fileblockid = "";
 	//buf is the file contents
 	public ModelParser2(char[] buf) {
 		int index = 0;
@@ -41,20 +41,12 @@ public class ModelParser2 {
 				if (parseendianess(buf,index)<=0)
 					if (parseversion(buf,index) <= 0)
 					 {
-						//parsevertices(buf,index);
-
-						//return;
-					//	for (; index < buf.length; ) { 
-							if (parsefileblock(buf,index,"DNA1") < 0) {
+						for (; index < buf.length; ) { 
+							if (parsefileblock(buf,index) < 0) {
 				
-								///parseDNA(buf,index);
-
-				//return;
-
-						index = 0;
-						//parsescene(buf,index);
-					//parsevertices(buf,index);
-						
+								System.out.println("123> EOF");							
+								return ;	
+						}		
 					}
 				}
 				else System.out.println("123> no endianess");	
@@ -181,10 +173,10 @@ public class ModelParser2 {
 		return 0;
 	}
 
-	public int parsefileblock(char[] buf, int index, String code) {
+	public int parsefileblock(char[] buf, int index) {
 
-		int size = parsefileblockheader(buf,index,code);
-		if (code == "DNA1")
+		int size = parsefileblockheader(buf,index);
+		if (fileblockid == "DNA1")
 			parseDNA(buf,index);
 		else
 			parsefileblockdata(buf,index,size);
@@ -204,7 +196,7 @@ public class ModelParser2 {
 	//code is "" if you want to parse thew next fileblock
 	//code is e.g. "DNA1" for searching that fileblock id
 	//it can be programmed better
-	public int parsefileblockheader(char[] buf, int index,String code)
+	public int parsefileblockheader(char[] buf, int index)
 	{
 
 		char[] id = new char[4];//4 wide
@@ -213,18 +205,9 @@ public class ModelParser2 {
 		id[2] = (char)(buf[index+2]);
 		id[3] = (char)(buf[index+3]);
 
-		if (code != "") {
-			for (; (id[0] != code.charAt(0) || id[1] != code.charAt(1) || id[2] != code.charAt(2) || id[3] != code.charAt(3)) && index < buf.length;) {//FIXME loop forever if DNA1 not present
-				index += 2;	
-				id[0] = (char)(buf[index]);
-				id[1] = (char)(buf[index+1]);
-				id[2] = (char)(buf[index+2]);
-				id[3] = (char)(buf[index+3]);
-							
-			}
-		}
-	
-		System.out.println("id> "+id[0]+id[1]+id[2]+id[3]);
+		fileblockid = ""+id[0]+id[1]+id[2]+id[3];	
+
+		System.out.println("fileblockid> "+id[0]+id[1]+id[2]+id[3]);
 		index += 4;
 		int size;
 		if (endianess == "big")
