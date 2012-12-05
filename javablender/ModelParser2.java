@@ -33,7 +33,12 @@ public class ModelParser2 {
 	private LinkedList namesarray = new LinkedList();
 	private LinkedList typesarray = new LinkedList();
 	private LinkedList structuresarray = new LinkedList();
-
+	private LinkedList vertexgroupnames = new LinkedList();
+	private LinkedList vertexgroupsizes = new LinkedList();
+	private LinkedList verticesx = new LinkedList();
+	private LinkedList verticesy = new LinkedList();
+	private LinkedList verticesz = new LinkedList();
+	private LinkedList verticesc = new LinkedList();
 	private int[] xs;
 	private int[] ys;
 	private int[] zs;
@@ -276,6 +281,31 @@ public class ModelParser2 {
  * parsing vertices
  */
 
+	public int parsevgroup(char[] buf, int index, int vgroupsizeindex)
+	{
+
+		Object vgroupsizeo = vertexgroupsizes.get(vgroupsizeindex);
+		int vgroupsize = (int)vgroupsizeo;
+		char[] chs = new char[vgroupsize];
+		int j = 0;	
+		for (int i = 0; i < chs.length; i+=4) {
+			int xx = cs[i];	
+			int yy = cs[i+1];	
+			int zz = cs[i+2];	
+			int cc = cs[i+3];	
+
+			xs[j] = xx;
+			ys[j] = yy;
+			zs[j] = zz;
+			cs[j] = cc;
+
+		}
+
+
+
+		return 0;
+	}
+
 	public int parsevgrouptype(String s)
 	{
 		//FIXME no [] in string
@@ -301,7 +331,6 @@ public class ModelParser2 {
 	{
 
 		for (int i = 0; i < namesarray.size(); i++) {
-			
 			Object o = namesarray.get(i);	
 			String s = (String)o;	
 			for (int j = 0; j < typesarray.size(); j++) {
@@ -310,12 +339,24 @@ public class ModelParser2 {
 
 				Object ooo = l1.get(j);
 				String s2 = (String)ooo;
-				parsevgrouptype(s2);	
+				int vgroupsize = parsevgrouptype(s2);	
+	
+				vertexgroupnames.add(s);
+				vertexgroupsizes.add(vgroupsize);	
 			}
 
-				
+			for (int j = 0; j < vertexgroupnames.size(); j++) {
+				Object vgnameo = vertexgroupnames.get(j);		
+				String vgname = (String)vgnameo;
 
-
+				for (int q = 0; index < buf.length; q++) {
+					parsefileblockheader(buf,index);
+					if (fileblockid == vgname) {
+						parsevgroup(buf,index,j);
+					}
+				}
+			}		
+/****
 			for (int k = 0; k < structuresarray.size(); k++) {
 				Object o3 = structuresarray.get(k);
 				LinkedList l2 = (LinkedList)o3;
@@ -333,10 +374,10 @@ public class ModelParser2 {
 					}
 				}	
 							
-						
-	
-				}	
+
 			}
+******/	
+		}
 		return 0;
 	}
 
