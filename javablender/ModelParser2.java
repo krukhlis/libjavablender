@@ -70,7 +70,7 @@ public class ModelParser2 {
 	public void padbytes(int index) 
 	{
 
-		index -= index%4;
+		index += index%4;
 
 	}
 	
@@ -168,42 +168,16 @@ public class ModelParser2 {
 
 	public int parsescene(char[] buf, int index)
 	{
-		int startindex = index;
-		while (index < buf.length) {//FIXME
-			char c1 = buf[index];
-			char c2 = buf[index+1];	
-			char c3 = buf[index+2];	
-			char c4 = buf[index+3];	
-			char c5 = buf[index+4];	
-			char c6 = buf[index+5];	
-			if (c1 == 'S' && c2 == 'C') {
-				System.out.println("block id> "+c1+c2);
-				break;
-			}	
-			index += 2;	
-		}
 		return 0;
 	}
 
 	public int parsefileblock(char[] buf, int index) {
 
-/****
-		for (; index < buf.length-4; ) {
-
-		char[] cs = new char[4];
-		cs[0] = buf[index+0];
-		cs[1] = buf[index+1];
-		cs[2] = buf[index+2];
-		cs[3] = buf[index+3];
-		index += 2;
-		if (cs[0] == 'D' && cs[1] == 'N' && cs[2] == 'A' && cs[3] == '1') {
-			index -= 4;	
-			break;
-		}
-		}	
-***/		int size = parsefileblockheader(buf,index);
+		int size = parsefileblockheader(buf,index);
 		if (fileblockid == "DNA1")
 			parseDNA(buf,index);
+		else if (fileblockid.charAt(0) == 'S' && fileblockid.charAt(1) == 'C')
+			parsescene(buf,index);
 		else
 			parsefileblockdata(buf,index,size);
 	
