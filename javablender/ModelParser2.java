@@ -438,8 +438,12 @@ public class ModelParser2 {
 					index += o;	
 
 					index +=2;
-					index += 4;//'STRC'	
-					
+					index += 4;//length id
+				}	
+				for (int k = 0; k < typesn; k++) {
+
+						index += 6; //length in bytes + 'STRC'		
+							
 						int structuresn;	
 						if (endianess == "big")
 							structuresn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
@@ -447,11 +451,25 @@ public class ModelParser2 {
 							structuresn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index+0];
 						for (int l = 0; l < structuresn; l++) {
 						
-							index+=6;	
-							
+							index+=2;	
+							int fieldsn;
+							if (endianess == "big")
+								fieldsn = buf[index]*2*2*2+buf[index+1]*2*2+buf[index+2]+2*buf[index+1]+1*buf[index];	
+							else
+								fieldsn = buf[index+3]*2*2*2+buf[index+2]*2*2+buf[index+1]+2*buf[index+1]+1*buf[index];	
 
+							int p;
+							for (p = 0; p < fieldsn ;p++ ) {
+							int indexintype;
+
+							if (endianess == "big") {
+								indexintype = 2*buf[index+1]+1*buf[index];	
+							} else
+								indexintype = 2*buf[index+1]+1*buf[index];	
+							}
+							index += 2;
 						}
-						index += 2;	
+						index += 2;//for structuresn end	
 					}	
 				
 
