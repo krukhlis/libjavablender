@@ -41,15 +41,32 @@ public class ModelParser2 {
 				if (parseendianess(buf,index)<=0)
 					if (parseversion(buf,index) <= 0)
 					 {
-					for (; index < buf.length; ) { 
-						if (parsefileblock(buf,index) < 0)
-							return;
+						//parsevertices(buf,index);
+
+						//return;
+					//	for (; index < buf.length; ) { 
+							if (parsefileblock(buf,index,"DNA1") < 0) {
+				
+								///parseDNA(buf,index);
+
+				//return;
+
+						index = 0;
+						//parsescene(buf,index);
 					//parsevertices(buf,index);
+						
 					}
 				}
 				else System.out.println("123> no endianess");	
 			}else System.out.println("123> no pointer size");	
 		}else System.out.println("123> no header");	
+
+	}
+
+	public void padbytes(int index) 
+	{
+
+		index -= index%4;
 
 	}
 	
@@ -144,33 +161,34 @@ public class ModelParser2 {
 /*
  * parsing file blocks 
  */ 
+
 	public int parsescene(char[] buf, int index)
 	{
-/*******	
-		while (index < buf.length) {
-			char c1 = buf[index++];
-			char c2 = buf[index++];	
-			char c3 = buf[index++];	
-			char c4 = buf[index++];	
-			if (c1 == 'S' && c2 == 'C' && c3 == 0 && c4 == 0) {
-				System.out.println("block id> "+c1+c2);
+		int startindex = index;
+		while (index < buf.length) {//FIXME
+			char c1 = buf[index];
+			char c2 = buf[index+1];	
+			char c3 = buf[index+2];	
+			char c4 = buf[index+3];	
+			char c5 = buf[index+4];	
+			char c6 = buf[index+5];	
+			if (c1 == 'S' && c2 == 'C') {
 				System.out.println("block id> "+c1+c2);
 				break;
-			}		
+			}	
+			index += 2;	
 		}
-*****/
 		return 0;
 	}
 
-	public int parsefileblock(char[] buf, int index) {
+	public int parsefileblock(char[] buf, int index, String code) {
 
-		int size = parsefileblockheader(buf,index);
-		parsefileblockdata(buf,index,size);
+		int size = parsefileblockheader(buf,index,code);
+		if (code == "DNA1")
+			parseDNA(buf,index);
+		else
+			parsefileblockdata(buf,index,size);
 	
-		//if (size == 0)//FIXME!
-		//	return -1;	
-		///index++;
-
 		return 0;	
 	}
 
@@ -183,17 +201,31 @@ public class ModelParser2 {
 		return 0;
 	}
 
-
-	public int parsefileblockheader(char[] buf, int index)
+	//code is "" if you want to parse thew next fileblock
+	//code is e.g. "DNA1" for searching that fileblock id
+	//it can be programmed better
+	public int parsefileblockheader(char[] buf, int index,String code)
 	{
-	
+
 		char[] id = new char[4];//4 wide
 		id[0] = (char)(buf[index]);
 		id[1] = (char)(buf[index+1]);
 		id[2] = (char)(buf[index+2]);
 		id[3] = (char)(buf[index+3]);
-		System.out.println("id> "+id[0]+id[1]+id[2]+id[3]);
 
+		if (code != "") {
+			for (; (id[0] != code.charAt(0) || id[1] != code.charAt(1) || id[2] != code.charAt(2) || id[3] != code.charAt(3)) && index < buf.length;) {//FIXME loop forever if DNA1 not present
+				index += 2;	
+				id[0] = (char)(buf[index]);
+				id[1] = (char)(buf[index+1]);
+				id[2] = (char)(buf[index+2]);
+				id[3] = (char)(buf[index+3]);
+							
+			}
+		}
+	
+		System.out.println("id> "+id[0]+id[1]+id[2]+id[3]);
+		index += 4;
 		int size;
 		if (endianess == "big")
 			size = buf[index]*2*2*2+buf[index+1]*2*2+buf[index+2]*2+buf[index+3]*1;
@@ -239,7 +271,31 @@ public class ModelParser2 {
 
 	public int parsevertices(char[] buf, int index)
 	{
-
+		while (index < buf.length) {
+			char c1 = buf[index];
+			char c2 = buf[index+1];	
+			char c3 = buf[index+2];	
+			char c4 = buf[index+3];	
+			if (/*c1 == 'V' &&*/ c2 == 'e') {
+				System.out.println("vertex id> "+c1+c2+c3+c4);
+				break;
+			}
+			index += 2;	
+			int i;
+			for ( i = index; i < buf.length; i++) {
+				if ((buf[i] >= 48 && buf[i] <= 57 && buf[i] >= 65 && buf[i] <= 90 && buf[i] >= 97 && buf[i] <= 122) || buf[i] == 95) {//FIXME
+									
+				}		
+			}
+			index += i;
+			
+	
+		}
+		return 0;
+	}
+	public int parseverticesnooffset(char[] buf, int index)
+	{
+		//padbytes(index);
 		int j = 0;
 		xs = new int[buf.length-index];//FIXME length	
 		ys = new int[buf.length-index];	
@@ -331,15 +387,17 @@ public class ModelParser2 {
 
 	public int parseDNA(char[] buf, int index)
 	{
-
-		char[] id = new char[4];//4 wide
-		id[0] = (char)(buf[index++]);
-		id[1] = (char)(buf[index++]);
-		id[2] = (char)(buf[index++]);
-		id[3] = (char)(buf[index++]);
-
-		System.out.println("DNAindex added, SC> "+id[0]+id[1]+id[2]+id[3]);
-		if (id[0] == 'S' && id[1] == 'D' && id[2] == 'N' && id[3] == 'A') {
+		char[] id = new char[8];
+		id[0] = buf[index];
+		id[1] = buf[index+1];
+		id[2] = buf[index+2];
+		id[3] = buf[index+3];
+		id[4] = buf[index+4];
+		id[5] = buf[index+5];
+		id[6] = buf[index+6];
+		id[7] = buf[index+7];
+		System.out.println("DNAindex added, SC> "+id[0]+id[1]+id[2]+id[3]+id[4]+id[5]+id[6]+id[7]);
+		//if (id[0] == 'D' && id[1] == 'N' && id[2] == 'A' && id[3] == '1') {
 
 
 			index += 8;
@@ -349,6 +407,7 @@ public class ModelParser2 {
 				for (j = 0;; ) {
 
 					char c = buf[index+j];
+					//System.out.println("DNAname> "+c);
 					if (c == '\0')
 						break;	
 				} 
@@ -384,8 +443,8 @@ public class ModelParser2 {
 			}
 
 			return 0;
-		}	
-		return -1;
+	//	}	
+	//	return -1;
 	}
 
 };
