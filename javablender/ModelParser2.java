@@ -35,6 +35,7 @@ public class ModelParser2 {
 	private LinkedList structuresarray = new LinkedList();
 	private LinkedList vertexgroupnames = new LinkedList();
 	private LinkedList vertexgroupsizes = new LinkedList();
+	private LinkedList vertexgroupindices = new LinkedList();
 	private LinkedList verticesx = new LinkedList();
 	private LinkedList verticesy = new LinkedList();
 	private LinkedList verticesz = new LinkedList();
@@ -287,12 +288,13 @@ public class ModelParser2 {
 		Object vgroupsizeo = vertexgroupsizes.get(vgroupsizeindex);
 		int vgroupsize = (int)vgroupsizeo;
 		char[] chs = new char[vgroupsize];
-		int j = 0;	
-		for (int i = 0; i < chs.length; i+=4) {
-			int xx = cs[i];	
-			int yy = cs[i+1];	
-			int zz = cs[i+2];	
-			int cc = cs[i+3];	
+		int j = 0;
+		int i;	
+		for (i = 0; i < chs.length; i+=4) {
+			int xx = chs[i];	
+			int yy = chs[i+1];	
+			int zz = chs[i+2];	
+			int cc = chs[i+3];	
 
 			xs[j] = xx;
 			ys[j] = yy;
@@ -301,7 +303,7 @@ public class ModelParser2 {
 
 		}
 
-
+		index += i;
 
 		return 0;
 	}
@@ -332,7 +334,8 @@ public class ModelParser2 {
 
 		for (int i = 0; i < namesarray.size(); i++) {
 			Object o = namesarray.get(i);	
-			String s = (String)o;	
+			String s = (String)o;
+			LinkedList li = new LinkedList();	
 			for (int j = 0; j < typesarray.size(); j++) {
 				Object o2 = typesarray.get(j);
 				LinkedList l1 = (LinkedList)o2;
@@ -340,35 +343,37 @@ public class ModelParser2 {
 				Object ooo = l1.get(j);
 				String s2 = (String)ooo;
 				int vgroupsize = parsevgrouptype(s2);	
-	
-				vertexgroupnames.add(s);
-				vertexgroupsizes.add(vgroupsize);	
+				li.add(vgroupsize);
+				vertexgroupindices.add(j);	
 			}
-
-			for (int j = 0; j < vertexgroupnames.size(); j++) {
-				Object vgnameo = vertexgroupnames.get(j);		
-				String vgname = (String)vgnameo;
-
-				for (int q = 0; index < buf.length; q++) {
-					parsefileblockheader(buf,index);
-					if (fileblockid == vgname) {
-						parsevgroup(buf,index,j);
-					}
-				}
-			}		
-/****
+			vertexgroupnames.add(s);
+			vertexgroupsizes.add(li);
 			for (int k = 0; k < structuresarray.size(); k++) {
 				Object o3 = structuresarray.get(k);
 				LinkedList l2 = (LinkedList)o3;
 				for (int l = 0; l < l2.size(); l++) {
 					Object o4 = l2.get(k);
 					LinkedList l3 = (LinkedList)o4;
+
+					int t = 0;
 					for (int m = 0; m < l3.size(); m++) {
 					
 						Object o5 = l3.get(m);
 						int indexintype = (int)o5;	
 
-							
+						Object o6 = vertexgroupindices.get(t);
+						int vgi = (int)o6;
+						if (m == vgi) {
+
+							for (; index < buf.length; ) {
+								parsefileblockheader(buf,index);
+								if (fileblockid == s) {
+									parsevgroup(buf,index,vgi);
+									break;//FIXME	
+								}
+							}		
+
+						}						
 
 	
 					}
@@ -376,7 +381,6 @@ public class ModelParser2 {
 							
 
 			}
-******/	
 		}
 		return 0;
 	}
