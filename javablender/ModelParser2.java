@@ -21,12 +21,17 @@ package javablender;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.*;
 
 public class ModelParser2 {
 	private int countstructure = 0;
 	private int SDNA_index = 0;
 	private int pointersize = 32;
 	private String endianess = "";
+
+	private LinkedList namesarray = new LinkedList();
+	private LinkedList typesarray = new LinkedList();
+	private LinkedList structuresarray = new LinkedList();
 
 	private int[] xs;
 	private int[] ys;
@@ -407,12 +412,17 @@ public class ModelParser2 {
 			System.out.println("namesn> "+namesn);
 			for (int i = 0; i < namesn; i++) {
 				int j;
+				String s = "";
 				for (j = 0;;j++ ) {
 
 					char c = buf[index+j];
+					s += c;
 					System.out.println("DNAname> "+c);
-					if (c == '\0')
-						break;	
+					if (c == '\0') {
+
+						namesarray.add(s);	
+						break;
+					}	
 				} 
 				index += j+1;	
 				index += 4;//'TYPE'
@@ -422,50 +432,61 @@ public class ModelParser2 {
 					typesn = 2*2*2*buf[index]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
 				else
 					typesn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index];
-
+				LinkedList li = new LinkedList();
 				for (int k = 0; k < typesn; k++) {
 					int o;
+					String s2 = "";
 					for (o = 0;;o++ ) {
 
 						char c = buf[index+o];
+						s2 += c;
 						System.out.println("TYPEname> "+c);
-						if (c == '\0')
-							break;	
+						if (c == '\0') {
+							li.add(s2);
+							break;
+						}	
 					} 
 					index += o+1;	
 
 					index +=2;
 					index += 4;//length id
-				}	
+				}
+				typesarray.add(li);	
 				for (int k = 0; k < typesn; k++) {
 
-						index += 6; //length in bytes + 'STRC'		
+					index += 6; //length in bytes + 'STRC'		
 							
-						int structuresn;	
+					int structuresn;	
+					if (endianess == "big")
+						structuresn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
+					else 
+						structuresn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index+0];
+					LinkedList li2 = new LinkedList();
+					for (int l = 0; l < structuresn; l++) {
+					
+						index+=2;	
+						int fieldsn;
 						if (endianess == "big")
-							structuresn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
-						else 
-							structuresn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index+0];
-						for (int l = 0; l < structuresn; l++) {
-						
-							index+=2;	
-							int fieldsn;
-							if (endianess == "big")
-								fieldsn = buf[index]*2*2*2+buf[index+1]*2*2+buf[index+2]+2*buf[index+1]+1*buf[index];	
-							else
-								fieldsn = buf[index+3]*2*2*2+buf[index+2]*2*2+buf[index+1]+2*buf[index+1]+1*buf[index];	
+							fieldsn = buf[index]*2*2*2+buf[index+1]*2*2+buf[index+2]+2*buf[index+1]+1*buf[index];	
+						else
+							fieldsn = buf[index+3]*2*2*2+buf[index+2]*2*2+buf[index+1]+2*buf[index+1]+1*buf[index];	
 
 							int p;
+							LinkedList li3 = new LinkedList();
 							for (p = 0; p < fieldsn ;p++ ) {
-							int indexintype;
+								int indexintype;
 
-							if (endianess == "big") {
-								indexintype = 2*buf[index+1]+1*buf[index];	
-							} else
-								indexintype = 2*buf[index+1]+1*buf[index];	
+								if (endianess == "big") 
+									indexintype = 2*buf[index+1]+1*buf[index];	
+								else
+									indexintype = 2*buf[index+1]+1*buf[index];	
+								li3.add(indexintype);	
 							}
+								
 							index += 2;
+							li2.add(li3);	
 						}
+						structuresarray.add(li2);	
 						index += 2;//for structuresn end	
 					}	
 				
