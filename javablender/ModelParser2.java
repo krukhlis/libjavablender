@@ -21,6 +21,7 @@ package javablender;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.*;
 import java.util.*;
 
 public class ModelParser2 {
@@ -271,30 +272,75 @@ public class ModelParser2 {
 
 	}
 
+/*
+ * parsing vertices
+ */
+
+	public int parsevgrouptype(String s)
+	{
+		//FIXME no [] in string
+		int ii = s.indexOf('[');	
+		int jj = s.indexOf(']');	
+		int r = 0;
+		int i = jj-1;	
+		for (int j = ii+1; j < jj; j++) {
+
+			if (s.charAt(j) >= 48 && s.charAt(j) <= 57) {
+			
+
+				r += (s.charAt(j)-48)*10*i;	
+					
+			}	
+			i--;
+		}
+	
+		return r;
+	}	
+ 
 	public int parsevertices(char[] buf, int index)
 	{
-		while (index < buf.length) {
-			char c1 = buf[index];
-			char c2 = buf[index+1];	
-			char c3 = buf[index+2];	
-			char c4 = buf[index+3];	
-			if (/*c1 == 'V' &&*/ c2 == 'e') {
-				System.out.println("vertex id> "+c1+c2+c3+c4);
-				break;
-			}
-			index += 2;	
-			int i;
-			for ( i = index; i < buf.length; i++) {
-				if ((buf[i] >= 48 && buf[i] <= 57 && buf[i] >= 65 && buf[i] <= 90 && buf[i] >= 97 && buf[i] <= 122) || buf[i] == 95) {//FIXME
-									
-				}		
-			}
-			index += i;
+
+		for (int i = 0; i < namesarray.size(); i++) {
 			
+			Object o = namesarray.get(i);	
+			String s = (String)o;	
+			for (int j = 0; j < typesarray.size(); j++) {
+				Object o2 = typesarray.get(j);
+				LinkedList l1 = (LinkedList)o2;
+
+				Object ooo = l1.get(j);
+				String s2 = (String)ooo;
+				parsevgrouptype(s2);	
+			}
+
+				
+
+
+			for (int k = 0; k < structuresarray.size(); k++) {
+				Object o3 = structuresarray.get(k);
+				LinkedList l2 = (LinkedList)o3;
+				for (int l = 0; l < l2.size(); l++) {
+					Object o4 = l2.get(k);
+					LinkedList l3 = (LinkedList)o4;
+					for (int m = 0; m < l3.size(); m++) {
+					
+						Object o5 = l3.get(m);
+						int indexintype = (int)o5;	
+
+							
+
 	
-		}
+					}
+				}	
+							
+						
+	
+				}	
+			}
 		return 0;
 	}
+
+
 	public int parseverticesnooffset(char[] buf, int index)
 	{
 		//padbytes(index);
