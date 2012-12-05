@@ -399,47 +399,62 @@ public class ModelParser2 {
 		System.out.println("DNAindex added, SC> "+id[0]+id[1]+id[2]+id[3]+id[4]+id[5]+id[6]+id[7]);
 		//if (id[0] == 'D' && id[1] == 'N' && id[2] == 'A' && id[3] == '1') {
 
-
 			index += 8;
-			int namesn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
+
+			int namesn;
+
+			if (endianess == "big")
+				namesn = 2*2*2*buf[index]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
+			else
+				namesn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index];
+			System.out.println("namesn> "+namesn);
 			for (int i = 0; i < namesn; i++) {
-				int j = 0;	
-				for (j = 0;; ) {
+				int j;
+				for (j = 0;;j++ ) {
 
 					char c = buf[index+j];
-					//System.out.println("DNAname> "+c);
+					System.out.println("DNAname> "+c);
 					if (c == '\0')
 						break;	
 				} 
 				index += j;	
 				index += 4;//'TYPE'
-				int typesn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
+				
+				int typesn;
+				if (endianess == "big")
+					typesn = 2*2*2*buf[index]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
+				else
+					typesn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index];
 
 				for (int k = 0; k < typesn; k++) {
-					int m = 0;
-					for (m = 0;; ) {
+					int o;
+					for (o = 0;;o++ ) {
 
-						char c = buf[index+j];
+						char c = buf[index+o];
+						System.out.println("TYPEname> "+c);
 						if (c == '\0')
 							break;	
 					} 
-					index += m;	
-					index += 4;//'TLEN'
-				}
+					index += o;	
 
-
-				for (int k = 0; k < typesn; k++) {
-
-					index += 6;
-					int structuresn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
-					for (int l = 0; l < structuresn; l++) {
+					index +=2;
+					index += 4;//'STRC'	
+					
+						int structuresn;	
+						if (endianess == "big")
+							structuresn = 2*2*2*buf[index+0]+2*2*buf[index+1]+2*buf[index+2]+1*buf[index+3];
+						else 
+							structuresn = 2*2*2*buf[index+3]+2*2*buf[index+2]+2*buf[index+1]+1*buf[index+0];
+						for (int l = 0; l < structuresn; l++) {
 						
-						index+=6;	
+							index+=6;	
 							
 
-					}
-					index += 2;	
-				}	
+						}
+						index += 2;	
+					}	
+				
+
 			}
 
 			return 0;
