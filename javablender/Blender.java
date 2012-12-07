@@ -32,11 +32,17 @@ public class Blender {
 	private int[] zarray;
 	private int[] carray;
 
-	public Blender(String blenderfilename) {
+	private String filename = "";
 
-		readinfile(blenderfilename);
-		char b[] = new char[buffer.length()*10];//FIXME length
+	public Blender() {
+	}
+
+	public void load(String fn)
+	{
+		filename = fn; 
+		readinfile(filename);
 		int i = 0;
+		char b[] = new char[buffer.length()*10];//FIXME length
 		while ( i < buffer.length()) {
 
 			b[i] = buffer.charAt(i); 
